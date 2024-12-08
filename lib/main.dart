@@ -310,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
     prefs.setStringList('highScores', scoresJson);
     // Yüksek skorları yeniden yükle
     _loadHighScores();
-    // Ekranı yenile
+    // Ekran yenile
     setState(() {});
   }
 
@@ -774,62 +774,95 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icons.emoji_events,
                       _showHighScores,
                     ),
-                    const SizedBox(height: 12),
-                    _buildMenuButton(
-                      AppLocalizations.get('how_to_play'),
-                      Icons.help_outline,
-                      _showTutorial,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildMenuButton(
-                      AppLocalizations.get('developer'),
-                      Icons.code,
-                      _showDeveloperInfo,
-                    ),
                     const SizedBox(height: 48),
 
-                    // Dil değiştirme butonu
+                    // Sağ alt köşedeki butonlar
                     Positioned(
-                      top: 16,
+                      bottom: 16,
                       right: 16,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: MinefieldApp.spotifyGrey,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: MinefieldApp.spotifyGreen,
-                            width: 2,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Nasıl Oynanır butonu
+                          Container(
+                            decoration: BoxDecoration(
+                              color: MinefieldApp.spotifyGrey,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: MinefieldApp.spotifyGreen,
+                                width: 2,
+                              ),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.help_outline,
+                                color: MinefieldApp.spotifyGreen,
+                              ),
+                              onPressed: _showTutorial,
+                            ),
                           ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () {
-                              setState(() {
-                                AppLocalizations.currentLanguage =
+                          const SizedBox(width: 8),
+                          // Dil değiştirme butonu
+                          Container(
+                            decoration: BoxDecoration(
+                              color: MinefieldApp.spotifyGrey,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: MinefieldApp.spotifyGreen,
+                                width: 2,
+                              ),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () {
+                                  setState(() {
+                                    AppLocalizations.currentLanguage =
+                                        AppLocalizations.currentLanguage ==
+                                                Language.tr
+                                            ? Language.en
+                                            : Language.tr;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  child: Text(
                                     AppLocalizations.currentLanguage ==
                                             Language.tr
-                                        ? Language.en
-                                        : Language.tr;
-                              });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: Text(
-                                AppLocalizations.currentLanguage == Language.tr
-                                    ? 'TR'
-                                    : 'EN',
-                                style: const TextStyle(
-                                  color: MinefieldApp.spotifyGreen,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                        ? 'TR'
+                                        : 'EN',
+                                    style: const TextStyle(
+                                      color: MinefieldApp.spotifyGreen,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          // Geliştirici butonu
+                          Container(
+                            decoration: BoxDecoration(
+                              color: MinefieldApp.spotifyGrey,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: MinefieldApp.spotifyGreen,
+                                width: 2,
+                              ),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.code,
+                                color: MinefieldApp.spotifyGreen,
+                              ),
+                              onPressed: _showDeveloperInfo,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
