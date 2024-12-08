@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +63,7 @@ class AppLocalizations {
       'best_score': 'En iyi skor',
       'play_again': 'Yeniden Başla',
       'flag_mode': 'Bayrak Modu',
-      'flag_mode_on': 'Bayrak Modu Aç��k',
+      'flag_mode_on': 'Bayrak Modu Açık',
       'tutorial_title': 'Nasıl Oynanır?',
       'basic_controls_title': 'Temel Kontroller',
       'basic_controls_content':
@@ -184,18 +185,21 @@ class AppLocalizations {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     // Firebase'i başlatmayı dene
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
+      // Firebase Database'i başlat
+      FirebaseDatabase.instance.setPersistenceEnabled(true);  // Çevrimdışı desteği için
+      FirebaseDatabase.instance.ref().keepSynced(true);  // Senkronizasyon için
     }
-    
+
     // MobileAds'i başlat
     await MobileAds.instance.initialize();
-    debugPrint('MobileAds initialized successfully');
+    debugPrint('Services initialized successfully');
   } catch (e) {
     debugPrint('Error during initialization: $e');
   }
@@ -281,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isSigningIn = false;
+  final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
   @override
   void initState() {
@@ -841,7 +846,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () {
                                 setState(() {
                                   AppLocalizations.currentLanguage =
-                                      AppLocalizations.currentLanguage == Language.tr
+                                      AppLocalizations.currentLanguage ==
+                                              Language.tr
                                           ? Language.en
                                           : Language.tr;
                                 });
@@ -850,7 +856,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 child: Text(
-                                  AppLocalizations.currentLanguage == Language.tr
+                                  AppLocalizations.currentLanguage ==
+                                          Language.tr
                                       ? 'TR'
                                       : 'EN',
                                   style: const TextStyle(
@@ -1142,7 +1149,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: Column(
             children: [
-              // Başlık ve geri butonu
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -1164,97 +1170,96 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              // Alt başlık
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  AppLocalizations.get('global_players'),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ),
-
-              // Sıralama başlıkları
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 50,
-                      child: Text(
-                        AppLocalizations.get('rank'),
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        AppLocalizations.get('player'),
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        AppLocalizations.get('score'),
-                        style: const TextStyle(color: Colors.grey),
-                        textAlign: TextAlign.end,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Sıralama listesi (örnek veriler)
               Expanded(
-                child: ListView.builder(
-                  itemCount: 100,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: MinefieldApp.spotifyBlack,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 40,
-                            child: Text(
-                              '#${index + 1}',
-                              style: TextStyle(
-                                color: index < 3
-                                    ? MinefieldApp.spotifyGreen
-                                    : Colors.grey,
-                                fontWeight: index < 3
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                              ),
+                child: StreamBuilder(
+                  stream: _database
+                      .child('scores')
+                      .orderByChild('score')
+                      .limitToFirst(100)
+                      .onValue,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && !snapshot.hasError) {
+                      final event = snapshot.data as DatabaseEvent;
+                      final scores = <Map<String, dynamic>>[];
+
+                      event.snapshot.children.forEach((child) {
+                        scores
+                            .add(Map<String, dynamic>.from(child.value as Map));
+                      });
+
+                      scores.sort((a, b) =>
+                          (a['score'] as int).compareTo(b['score'] as int));
+
+                      return ListView.builder(
+                        itemCount: scores.length,
+                        itemBuilder: (context, index) {
+                          final score = scores[index];
+                          final isCurrentUser =
+                              score['userId'] == _currentUser?.uid;
+
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isCurrentUser
+                                  ? MinefieldApp.spotifyGreen.withOpacity(0.2)
+                                  : MinefieldApp.spotifyBlack,
+                              borderRadius: BorderRadius.circular(8),
+                              border: isCurrentUser
+                                  ? Border.all(color: MinefieldApp.spotifyGreen)
+                                  : null,
                             ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              'Player ${index + 1}',
-                              style: const TextStyle(color: Colors.white),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 40,
+                                  child: Text(
+                                    '#${index + 1}',
+                                    style: TextStyle(
+                                      color: index < 3
+                                          ? MinefieldApp.spotifyGreen
+                                          : Colors.grey,
+                                      fontWeight: index < 3
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                                if (score['photoURL'] != null)
+                                  CircleAvatar(
+                                    radius: 15,
+                                    backgroundImage:
+                                        NetworkImage(score['photoURL']),
+                                  ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    score['userName'] ?? 'Anonim',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                Text(
+                                  '${score['score']} sn',
+                                  style: const TextStyle(
+                                    color: MinefieldApp.spotifyGreen,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(
-                            width: 80,
-                            child: Text(
-                              '---',
-                              style: TextStyle(color: Colors.white),
-                              textAlign: TextAlign.end,
-                            ),
-                          ),
-                        ],
+                          );
+                        },
+                      );
+                    }
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: MinefieldApp.spotifyGreen,
                       ),
                     );
                   },
                 ),
               ),
-
-              // Kendi sıralaması
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -1264,44 +1269,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppLocalizations.get('your_rank'),
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          '#---',
-                          style: TextStyle(
-                            color: MinefieldApp.spotifyGreen,
-                            fontWeight: FontWeight.bold,
+                    if (_currentUser != null) ...[
+                      ElevatedButton(
+                        onPressed: _startOnlineGame,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: MinefieldApp.spotifyGreen,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: null, // Devre dışı
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            MinefieldApp.spotifyGreen.withOpacity(0.3),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.play_arrow),
+                            const SizedBox(width: 8),
+                            Text(AppLocalizations.get('play_online')),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.play_arrow),
-                          const SizedBox(width: 8),
-                          Text(AppLocalizations.get('coming_soon')),
-                        ],
+                    ] else ...[
+                      Text(
+                        'Online oynamak için giriş yapın',
+                        style: TextStyle(color: Colors.grey[400]),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -1342,15 +1335,16 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = 
+      final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
-      
+
       setState(() {
         _currentUser = userCredential.user;
         _isSigningIn = false;
@@ -1465,14 +1459,77 @@ class _HomeScreenState extends State<HomeScreen> {
       _handleGoogleSignIn,
     );
   }
+
+  Future<void> _startOnlineGame() async {
+    if (_currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lütfen önce Google ile giriş yapın'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final startTime = DateTime.now().millisecondsSinceEpoch;
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => GameScreen(
+            mode: GameMode.medium,
+            isOnline: true,
+            onGameComplete: (score) async {
+              try {
+                final endTime = DateTime.now().millisecondsSinceEpoch;
+                final duration = (endTime - startTime) ~/ 1000;
+
+                // Yeni skor verisi
+                final scoreData = {
+                  'userId': _currentUser!.uid,
+                  'userName': _currentUser!.displayName,
+                  'photoURL': _currentUser!.photoURL,
+                  'score': duration,
+                  'timestamp': endTime,
+                };
+
+                // Veriyi kaydet
+                final newScoreRef = _database.child('scores').push();
+                await newScoreRef.set(scoreData);
+                
+                debugPrint('Score saved successfully: $duration seconds');
+              } catch (e) {
+                debugPrint('Error saving score: $e');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Skor kaydedilirken hata oluştu: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error starting online game: $e');
+    }
+  }
 }
 
 class GameScreen extends StatefulWidget {
   final GameMode mode;
+  final bool isOnline;
+  final Function(int score)? onGameComplete;
 
   const GameScreen({
     super.key,
     required this.mode,
+    this.isOnline = false,
+    this.onGameComplete,
   });
 
   @override
@@ -1580,14 +1637,18 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> _saveHighScore(int time) async {
     try {
+      if (widget.isOnline && widget.onGameComplete != null) {
+        widget.onGameComplete!(time);
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final currentScores = prefs.getStringList('highScores') ?? [];
 
       // Mevcut skorları yükle ve sırala
       final scores = currentScores
           .map((score) => HighScore.fromJson(jsonDecode(score)))
-          .toList()
-        ..sort((a, b) => a.time.compareTo(b.time));
+              .toList()
+            ..sort((a, b) => a.time.compareTo(b.time));
 
       // Yeni skoru ekle
       final newScore = HighScore(
