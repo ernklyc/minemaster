@@ -38,8 +38,8 @@ class AppLocalizations {
     'tr': {
       'app_name': 'MF MASTER ONLINE',
       'game_description': 'Güçlendirilmiş Mayın Tarlası',
-      'play': 'Oyuna Başla',
-      'high_scores': 'Yüksek Skorlar',
+      'play': 'Online Oyuna Başla',
+      'high_scores': 'Offline Yüksek Skorlar',
       'how_to_play': 'Nasıl Oynanır?',
       'developer': 'Geliştirici',
       'basic_controls': 'Temel Kontroller',
@@ -86,14 +86,14 @@ class AppLocalizations {
       'mode_easy_desc': '8x8 - 10 mayın',
       'mode_medium_desc': '10x10 - 15 mayın',
       'mode_hard_desc': '12x12 - 25 mayın',
-      'high_scores_title': 'Yüksek Skorlar',
+      'high_scores_title': 'Offline Yüksek Skorlar',
       'no_high_scores': 'Henüz yüksek skor yok!',
       'your_time': 'Süreniz',
       'best_time': 'En İyi Süre',
       'close_button': 'Kapat',
       'score_date': 'Tarih',
       'score_time': 'Süre',
-      'play_offline': 'Oyuna Başla',
+      'play_offline': 'Offline Oyuna Başla',
       'play_online': 'Online Oyna',
       'online_leaderboard': 'Online Sıralama',
       'your_rank': 'Sıralamanız',
@@ -108,8 +108,8 @@ class AppLocalizations {
     'en': {
       'app_name': 'MF MASTER ONLINE',
       'game_description': 'Enhanced Minesweeper',
-      'play': 'Play Game',
-      'high_scores': 'High Scores',
+      'play': 'Offline Play Game',
+      'high_scores': 'Offline High Scores',
       'how_to_play': 'How to Play',
       'developer': 'Developer',
       'basic_controls': 'Basic Controls',
@@ -163,7 +163,7 @@ class AppLocalizations {
       'close_button': 'Close',
       'score_date': 'Date',
       'score_time': 'Time',
-      'play_offline': 'Play Game',
+      'play_offline': 'Offline Play Game',
       'play_online': 'Play Online',
       'online_leaderboard': 'Online Leaderboard',
       'your_rank': 'Your Rank',
@@ -193,8 +193,9 @@ void main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
       // Firebase Database'i başlat
-      FirebaseDatabase.instance.setPersistenceEnabled(true);  // Çevrimdışı desteği için
-      FirebaseDatabase.instance.ref().keepSynced(true);  // Senkronizasyon için
+      FirebaseDatabase.instance
+          .setPersistenceEnabled(true); // Çevrimdışı desteği için
+      FirebaseDatabase.instance.ref().keepSynced(true); // Senkronizasyon için
     }
 
     // MobileAds'i başlat
@@ -779,16 +780,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Menü Butonları
                     _buildMenuButton(
-                      AppLocalizations.get('play_offline'),
-                      Icons.play_arrow,
-                      _showGameModeDialog,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildMenuButton(
                       AppLocalizations.get('play_online'),
                       Icons.wifi,
                       _showOnlineLeaderboard,
                       isDisabled: false,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildMenuButton(
+                      AppLocalizations.get('play_offline'),
+                      Icons.play_arrow,
+                      _showGameModeDialog,
                     ),
                     const SizedBox(height: 12),
                     _buildMenuButton(
@@ -1270,29 +1271,53 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     if (_currentUser != null) ...[
-                      ElevatedButton(
-                        onPressed: _startOnlineGame,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: MinefieldApp.spotifyGreen,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _startOnlineGame,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: MinefieldApp.spotifyGreen,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 4,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.play_arrow),
-                            const SizedBox(width: 8),
-                            Text(AppLocalizations.get('play_online')),
-                          ],
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.play_arrow,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                AppLocalizations.get('play_online'),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ] else ...[
-                      Text(
-                        'Online oynamak için giriş yapın',
-                        style: TextStyle(color: Colors.grey[400]),
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          'Online oynamak için giriş yapın',
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
+                        ),
                       ),
                     ],
                   ],
@@ -1315,9 +1340,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       _currentUser = FirebaseAuth.instance.currentUser;
       setState(() {});
-    } catch (e) {
-      debugPrint('Error checking current user: $e');
-    }
+    } catch (e) {}
   }
 
   // Google ile giriş fonksiyonu
@@ -1473,7 +1496,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final startTime = DateTime.now().millisecondsSinceEpoch;
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -1515,11 +1538,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (existingScoreKey != null) {
                     // Mevcut skoru güncelle
-                    await _database.child('scores').child(existingScoreKey!).update(scoreData);
+                    await _database
+                        .child('scores')
+                        .child(existingScoreKey!)
+                        .update(scoreData);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Yeni rekor! Önceki: $existingScore sn -> Yeni: $duration sn'),
+                          content: Text(
+                              'Yeni rekor! Önceki: $existingScore sn -> Yeni: $duration sn'),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -1540,13 +1567,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Daha iyi bir rekorunuz var: $existingScore saniye > $duration saniye'),
+                        content: Text(
+                            'Daha iyi bir rekorunuz var: $existingScore saniye > $duration saniye'),
                         backgroundColor: Colors.orange,
                       ),
                     );
                   }
                 }
-                
+
                 debugPrint('Score process completed: $duration seconds');
               } catch (e) {
                 debugPrint('Error saving score: $e');
@@ -1696,8 +1724,8 @@ class _GameScreenState extends State<GameScreen> {
       // Mevcut skorları yükle ve sırala
       final scores = currentScores
           .map((score) => HighScore.fromJson(jsonDecode(score)))
-              .toList()
-            ..sort((a, b) => a.time.compareTo(b.time));
+          .toList()
+        ..sort((a, b) => a.time.compareTo(b.time));
 
       // Yeni skoru ekle
       final newScore = HighScore(
