@@ -10,12 +10,6 @@
 .svn/
 migrate_working_dir/
 
-# .env dosyasını gizle
-assets/.env
-
-# android klasörünü gizle
-android/
-
 # IntelliJ related
 *.iml
 *.ipr
@@ -47,15 +41,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Hide android and lib folders
-/android/
-/lib/
-
-# Keep specific files public if needed
-!/android/app/src/main/AndroidManifest.xml
-!/android/app/build.gradle
-!/lib/README.md
 
 # Hide sensitive information
 google-services.json
