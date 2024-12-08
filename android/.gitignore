@@ -11,3 +11,9 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# .env dosyasını gizle
+assets/.env
+
+# android klasörünü gizle
+android/
