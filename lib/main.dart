@@ -61,7 +61,7 @@ class AppLocalizations {
       'tutorial_title': 'Nasıl Oynanır?',
       'basic_controls_title': 'Temel Kontroller',
       'basic_controls_content':
-          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak i��in alttaki butonu kullan',
+          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak için alttaki butonu kullan',
       'numbers_title': 'Sayıların Anlamı',
       'numbers_content':
           '• Sayılar çevredeki mayın sayısını gösterir\n• 1: Çevrede 1 mayın var\n• 2: Çevrede 2 mayın var\n• Boş kareler güvenli bölgeyi gösterir',
@@ -87,6 +87,17 @@ class AppLocalizations {
       'close_button': 'Kapat',
       'score_date': 'Tarih',
       'score_time': 'Süre',
+      'play_offline': 'Oyuna Başla',
+      'play_online': 'Online Oyna (Yakında)',
+      'online_leaderboard': 'Online Sıralama',
+      'your_rank': 'Sıralamanız',
+      'rank': 'Sıra',
+      'player': 'Oyuncu',
+      'score': 'Skor',
+      'play_online_soon': 'Online Mod Yakında!',
+      'global_players': 'Tüm Oyuncular',
+      'join_online': 'Online Oyuna Katıl',
+      'coming_soon': 'Yakında...',
     },
     'en': {
       'app_name': 'MF MASTER ONLINE',
@@ -146,6 +157,17 @@ class AppLocalizations {
       'close_button': 'Close',
       'score_date': 'Date',
       'score_time': 'Time',
+      'play_offline': 'Play Game',
+      'play_online': 'Play Online (Coming Soon)',
+      'online_leaderboard': 'Online Leaderboard',
+      'your_rank': 'Your Rank',
+      'rank': 'Rank',
+      'player': 'Player',
+      'score': 'Score',
+      'play_online_soon': 'Online Mode Coming Soon!',
+      'global_players': 'Global Players',
+      'join_online': 'Join Online Game',
+      'coming_soon': 'Coming Soon...',
     },
   };
 
@@ -157,14 +179,14 @@ class AppLocalizations {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   MobileAds.instance.initialize().then((initializationStatus) {
     if (kDebugMode) {
       print('MobileAds initialization status: $initializationStatus');
       print('Please check logcat for test device ID');
     }
   });
-  
+
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MinefieldApp());
 }
@@ -673,30 +695,30 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: MinefieldApp.spotifyGreen.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.grid_4x4,
-                        size: 64,
+                        size: 48,
                         color: MinefieldApp.spotifyGreen,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Başlık
                     const Text(
                       'MF MASTER ONLINE',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 30,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2,
                       ),
@@ -709,34 +731,44 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: MinefieldApp.spotifyGrey,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         AppLocalizations.get('game_description'),
-                        style: const TextStyle(color: Colors.grey),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 36),
 
                     // Menü Butonları
                     _buildMenuButton(
-                      AppLocalizations.get('play'),
+                      AppLocalizations.get('play_offline'),
                       Icons.play_arrow,
                       _showGameModeDialog,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+                    _buildMenuButton(
+                      AppLocalizations.get('play_online'),
+                      Icons.wifi,
+                      _showOnlineLeaderboard,
+                      isDisabled: false,
+                    ),
+                    const SizedBox(height: 12),
                     _buildMenuButton(
                       AppLocalizations.get('high_scores'),
                       Icons.emoji_events,
                       _showHighScores,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildMenuButton(
                       AppLocalizations.get('how_to_play'),
                       Icons.help_outline,
                       _showTutorial,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildMenuButton(
                       AppLocalizations.get('developer'),
                       Icons.code,
@@ -772,7 +804,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
+                                  horizontal: 12, vertical: 6),
                               child: Text(
                                 AppLocalizations.currentLanguage == Language.tr
                                     ? 'TR'
@@ -798,27 +830,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildMenuButton(String label, IconData icon, VoidCallback onPressed) {
+  Widget _buildMenuButton(String label, IconData icon, VoidCallback onPressed,
+      {bool isDisabled = false}) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: onPressed,
+        onPressed: isDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: MinefieldApp.spotifyGrey,
+          backgroundColor: MinefieldApp.spotifyGreen,
           padding: const EdgeInsets.symmetric(
-            horizontal: 32,
-            vertical: 20,
+            horizontal: 24,
+            vertical: 16,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
+          disabledBackgroundColor: MinefieldApp.spotifyGreen.withOpacity(0.5),
+          disabledForegroundColor: Colors.white.withOpacity(0.5),
         ),
-        icon: Icon(icon),
+        icon: Icon(
+          icon,
+          color: Colors.white,
+          size: 22,
+        ),
         label: Text(
           label,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -870,7 +910,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     _buildDeveloperInfoRow(
                       Icons.person,
-                      'Eren KALAYCI',
+                      'Eren KALAYCI\nYelbegen Software',
                     ),
                     const Divider(color: Colors.grey),
                     _buildDeveloperInfoRow(
@@ -953,6 +993,202 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(color: Colors.white),
                 ),
         ],
+      ),
+    );
+  }
+
+  void _showOnlineLeaderboard() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: BoxDecoration(
+            color: MinefieldApp.spotifyGrey,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Başlık
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: MinefieldApp.spotifyGreen.withOpacity(0.1),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.leaderboard,
+                        color: MinefieldApp.spotifyGreen),
+                    const SizedBox(width: 8),
+                    Text(
+                      AppLocalizations.get('online_leaderboard'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Alt başlık
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  AppLocalizations.get('global_players'),
+                  style: const TextStyle(color: Colors.grey),
+                ),
+              ),
+
+              // Sıralama başlıkları
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 50,
+                      child: Text(
+                        AppLocalizations.get('rank'),
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.get('player'),
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 80,
+                      child: Text(
+                        AppLocalizations.get('score'),
+                        style: const TextStyle(color: Colors.grey),
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Sıralama listesi (örnek veriler)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 100,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: MinefieldApp.spotifyBlack,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 40,
+                            child: Text(
+                              '#${index + 1}',
+                              style: TextStyle(
+                                color: index < 3
+                                    ? MinefieldApp.spotifyGreen
+                                    : Colors.grey,
+                                fontWeight: index < 3
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'Player ${index + 1}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 80,
+                            child: Text(
+                              '---',
+                              style: TextStyle(color: Colors.white),
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              // Kendi sıralaması
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: MinefieldApp.spotifyBlack,
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          AppLocalizations.get('your_rank'),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          '#---',
+                          style: TextStyle(
+                            color: MinefieldApp.spotifyGreen,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: null, // Devre dışı
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            MinefieldApp.spotifyGreen.withOpacity(0.3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.play_arrow),
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.get('coming_soon')),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
