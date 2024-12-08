@@ -1485,20 +1485,69 @@ class _HomeScreenState extends State<HomeScreen> {
                 final endTime = DateTime.now().millisecondsSinceEpoch;
                 final duration = (endTime - startTime) ~/ 1000;
 
-                // Yeni skor verisi
-                final scoreData = {
-                  'userId': _currentUser!.uid,
-                  'userName': _currentUser!.displayName,
-                  'photoURL': _currentUser!.photoURL,
-                  'score': duration,
-                  'timestamp': endTime,
-                };
+                // Kullanıcının mevcut skorunu kontrol et
+                final userScoresSnapshot = await _database
+                    .child('scores')
+                    .orderByChild('userId')
+                    .equalTo(_currentUser!.uid)
+                    .get();
 
-                // Veriyi kaydet
-                final newScoreRef = _database.child('scores').push();
-                await newScoreRef.set(scoreData);
+                String? existingScoreKey;
+                int? existingScore;
+
+                if (userScoresSnapshot.exists) {
+                  final scores = userScoresSnapshot.value as Map;
+                  scores.forEach((key, value) {
+                    existingScoreKey = key;
+                    existingScore = value['score'] as int;
+                  });
+                }
+
+                // Yeni skor daha iyiyse (daha düşükse) veya mevcut skor yoksa kaydet
+                if (existingScore == null || duration < existingScore!) {
+                  final scoreData = {
+                    'userId': _currentUser!.uid,
+                    'userName': _currentUser!.displayName,
+                    'photoURL': _currentUser!.photoURL,
+                    'score': duration,
+                    'timestamp': endTime,
+                  };
+
+                  if (existingScoreKey != null) {
+                    // Mevcut skoru güncelle
+                    await _database.child('scores').child(existingScoreKey!).update(scoreData);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Yeni rekor! Önceki: $existingScore sn -> Yeni: $duration sn'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    // Yeni skor ekle
+                    await _database.child('scores').push().set(scoreData);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('İlk skorunuz: $duration saniye'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Daha iyi bir rekorunuz var: $existingScore saniye > $duration saniye'),
+                        backgroundColor: Colors.orange,
+                      ),
+                    );
+                  }
+                }
                 
-                debugPrint('Score saved successfully: $duration seconds');
+                debugPrint('Score process completed: $duration seconds');
               } catch (e) {
                 debugPrint('Error saving score: $e');
                 if (context.mounted) {
