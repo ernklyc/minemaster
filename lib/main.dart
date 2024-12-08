@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shimmer/shimmer.dart';
 
 enum Language { tr, en }
 
@@ -61,7 +62,7 @@ class AppLocalizations {
       'best_score': 'En iyi skor',
       'play_again': 'Yeniden Başla',
       'flag_mode': 'Bayrak Modu',
-      'flag_mode_on': 'Bayrak Modu Açık',
+      'flag_mode_on': 'Bayrak Modu Aç��k',
       'tutorial_title': 'Nasıl Oynanır?',
       'basic_controls_title': 'Temel Kontroller',
       'basic_controls_content':
@@ -279,6 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
   User? _currentUser;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  bool _isSigningIn = false;
 
   @override
   void initState() {
@@ -794,11 +796,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Google ile giriş butonu (eğer giriş yapılmamışsa)
                     if (_currentUser == null) ...[
                       const SizedBox(height: 12),
-                      _buildMenuButton(
-                        'Google ile Bağlan',
-                        Icons.login,
-                        _handleGoogleSignIn,
-                      ),
+                      _buildGoogleSignInButton(),
                     ],
 
                     const SizedBox(height: 48),
@@ -1331,9 +1329,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Google ile giriş fonksiyonu
   Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isSigningIn = true;
+    });
+
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return;
+      if (googleUser == null) {
+        setState(() {
+          _isSigningIn = false;
+        });
+        return;
+      }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -1346,6 +1353,7 @@ class _HomeScreenState extends State<HomeScreen> {
       
       setState(() {
         _currentUser = userCredential.user;
+        _isSigningIn = false;
       });
     } catch (e) {
       debugPrint('Error during Google sign in: $e');
@@ -1357,6 +1365,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       }
+      setState(() {
+        _isSigningIn = false;
+      });
     }
   }
 
@@ -1379,6 +1390,80 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     }
+  }
+
+  Widget _buildGoogleSignInButton() {
+    if (_isSigningIn) {
+      return Shimmer.fromColors(
+        baseColor: MinefieldApp.spotifyGrey,
+        highlightColor: MinefieldApp.spotifyGreen.withOpacity(0.5),
+        period: const Duration(milliseconds: 1500), // Animasyon hızı
+        child: Container(
+          width: double.infinity,
+          height: 50,
+          decoration: BoxDecoration(
+            color: MinefieldApp.spotifyGrey,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: MinefieldApp.spotifyGreen.withOpacity(0.3),
+              width: 2,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Dönen icon
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    MinefieldApp.spotifyGreen.withOpacity(0.7),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Yanıp sönen yazı
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: const Text(
+                  'Google ile Bağlanılıyor...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Google ikonu
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(
+                  Icons.g_mobiledata,
+                  color: MinefieldApp.spotifyGreen,
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return _buildMenuButton(
+      'Google ile Bağlan',
+      Icons.login,
+      _handleGoogleSignIn,
+    );
   }
 }
 
