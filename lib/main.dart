@@ -1,7 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:minemaster/ad_helper.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +30,7 @@ class AppLocalizations {
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'tr': {
-      'app_name': 'MINEMASTER',
+      'app_name': 'MF MASTER ONLINE',
       'game_description': 'Güçlendirilmiş Mayın Tarlası',
       'play': 'Oyuna Başla',
       'high_scores': 'Yüksek Skorlar',
@@ -58,7 +61,7 @@ class AppLocalizations {
       'tutorial_title': 'Nasıl Oynanır?',
       'basic_controls_title': 'Temel Kontroller',
       'basic_controls_content':
-          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak için alttaki butonu kullan',
+          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak i��in alttaki butonu kullan',
       'numbers_title': 'Sayıların Anlamı',
       'numbers_content':
           '• Sayılar çevredeki mayın sayısını gösterir\n• 1: Çevrede 1 mayın var\n• 2: Çevrede 2 mayın var\n• Boş kareler güvenli bölgeyi gösterir',
@@ -77,9 +80,16 @@ class AppLocalizations {
       'mode_easy_desc': '8x8 - 10 mayın',
       'mode_medium_desc': '10x10 - 15 mayın',
       'mode_hard_desc': '12x12 - 25 mayın',
+      'high_scores_title': 'Yüksek Skorlar',
+      'no_high_scores': 'Henüz yüksek skor yok!',
+      'your_time': 'Süreniz',
+      'best_time': 'En İyi Süre',
+      'close_button': 'Kapat',
+      'score_date': 'Tarih',
+      'score_time': 'Süre',
     },
     'en': {
-      'app_name': 'MINEMASTER',
+      'app_name': 'MF MASTER ONLINE',
       'game_description': 'Enhanced Minesweeper',
       'play': 'Play Game',
       'high_scores': 'High Scores',
@@ -129,6 +139,13 @@ class AppLocalizations {
       'mode_easy_desc': '8x8 - 10 mines',
       'mode_medium_desc': '10x10 - 15 mines',
       'mode_hard_desc': '12x12 - 25 mines',
+      'high_scores_title': 'High Scores',
+      'no_high_scores': 'No high scores yet!',
+      'your_time': 'Your Time',
+      'best_time': 'Best Time',
+      'close_button': 'Close',
+      'score_date': 'Date',
+      'score_time': 'Time',
     },
   };
 
@@ -140,6 +157,14 @@ class AppLocalizations {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  MobileAds.instance.initialize().then((initializationStatus) {
+    if (kDebugMode) {
+      print('MobileAds initialization status: $initializationStatus');
+      print('Please check logcat for test device ID');
+    }
+  });
+  
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MinefieldApp());
 }
@@ -156,7 +181,7 @@ class MinefieldApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MineMaster',
+      title: 'MF Master Online',
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: spotifyBlack,
@@ -383,22 +408,22 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: MinefieldApp.spotifyGrey,
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.emoji_events, color: MinefieldApp.spotifyGreen),
-            SizedBox(width: 8),
+            const Icon(Icons.emoji_events, color: MinefieldApp.spotifyGreen),
+            const SizedBox(width: 8),
             Text(
-              'Yüksek Skorlar',
-              style: TextStyle(color: MinefieldApp.spotifyGreen),
+              AppLocalizations.get('high_scores_title'),
+              style: const TextStyle(color: MinefieldApp.spotifyGreen),
             ),
           ],
         ),
         content: SizedBox(
           width: double.maxFinite,
           child: highScores.isEmpty
-              ? const Text(
-                  'Henüz yüksek skor yok!',
-                  style: TextStyle(color: Colors.grey),
+              ? Text(
+                  AppLocalizations.get('no_high_scores'),
+                  style: const TextStyle(color: Colors.grey),
                 )
               : ListView.builder(
                   shrinkWrap: true,
@@ -444,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${score.time} saniye',
+                                '${score.time} ${AppLocalizations.get("seconds")}',
                                 style: TextStyle(
                                   color: index == 0
                                       ? MinefieldApp.spotifyGreen
@@ -470,9 +495,9 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Kapat',
-              style: TextStyle(color: MinefieldApp.spotifyGreen),
+            child: Text(
+              AppLocalizations.get('close_button'),
+              style: const TextStyle(color: MinefieldApp.spotifyGreen),
             ),
           ),
         ],
@@ -545,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildModeButton(GameMode mode, String title, String size) {
     String modeTitle;
     String modeDesc;
-    
+
     switch (mode) {
       case GameMode.easy:
         modeTitle = AppLocalizations.get('mode_easy');
@@ -669,7 +694,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Başlık
                     const Text(
-                      'MINEMASTER',
+                      'MF MASTER ONLINE',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -959,12 +984,55 @@ class _GameScreenState extends State<GameScreen> {
   late bool _isFlagMode;
   List<HighScore> highScores = [];
   late SharedPreferences prefs;
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
+  BannerAd? _bottomBannerAd;
+  bool _isBottomBannerAdReady = false;
 
   @override
   void initState() {
     super.initState();
     _loadHighScores();
     _initializeGame();
+    _loadBannerAd();
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load banner ad: ${err.message}');
+          _isBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    )..load();
+
+    _bottomBannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isBottomBannerAdReady = true;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          debugPrint('Failed to load bottom banner ad: ${err.message}');
+          _isBottomBannerAdReady = false;
+          ad.dispose();
+        },
+      ),
+    )..load();
   }
 
   Future<void> _loadHighScores() async {
@@ -987,23 +1055,24 @@ class _GameScreenState extends State<GameScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final currentScores = prefs.getStringList('highScores') ?? [];
-      
+
       final newScore = HighScore(
         time: time,
         date: DateTime.now(),
       );
-      
+
       currentScores.add(jsonEncode(newScore.toJson()));
-      
+
       final scores = currentScores
           .map((score) => HighScore.fromJson(jsonDecode(score)))
           .toList()
         ..sort((a, b) => a.time.compareTo(b.time));
-      
-      final topScores = scores.take(5).map((score) => jsonEncode(score.toJson())).toList();
-      
+
+      final topScores =
+          scores.take(5).map((score) => jsonEncode(score.toJson())).toList();
+
       await prefs.setStringList('highScores', topScores);
-      
+
       setState(() {
         highScores = scores.take(5).toList();
       });
@@ -1029,6 +1098,8 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    _bannerAd?.dispose();
+    _bottomBannerAd?.dispose();
     _timer.cancel();
     super.dispose();
   }
@@ -1186,7 +1257,7 @@ class _GameScreenState extends State<GameScreen> {
     if (isWin) {
       _saveHighScore(_time);
     }
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1458,90 +1529,116 @@ class _GameScreenState extends State<GameScreen> {
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              MinefieldApp.spotifyBlack,
-              MinefieldApp.spotifyBlack.withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: gridSize,
-                height: gridSize,
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: _cols,
-                    crossAxisSpacing: 2,
-                    mainAxisSpacing: 2,
-                  ),
-                  itemCount: _rows * _cols,
-                  itemBuilder: (context, index) {
-                    final row = index ~/ _cols;
-                    final col = index % _cols;
-                    final cell = _grid[row][col];
-
-                    return Container(
-                      margin: const EdgeInsets.all(1.5),
-                      decoration: BoxDecoration(
-                        color: cell.isRevealed
-                            ? (cell.isMine
-                                ? Colors.red.withOpacity(0.9)
-                                : MinefieldApp.spotifyLightGrey
-                                    .withOpacity(0.95))
-                            : MinefieldApp.spotifyGrey.withOpacity(0.95),
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: cell.isFlagged
-                              ? MinefieldApp.spotifyGreen
-                              : Colors.black.withOpacity(0.1),
-                          width: cell.isFlagged ? 2 : 1,
+      body: Column(
+        children: [
+          if (_isBannerAdReady)
+            Container(
+              width: _bannerAd!.size.width.toDouble(),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    MinefieldApp.spotifyBlack,
+                    MinefieldApp.spotifyBlack.withOpacity(0.8),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: gridSize,
+                      height: gridSize,
+                      child: GridView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _cols,
+                          crossAxisSpacing: 2,
+                          mainAxisSpacing: 2,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 2,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(6),
-                          onTap: () {
-                            if (_isFlagMode) {
-                              _toggleFlag(row, col);
-                            } else {
-                              _revealCell(row, col);
-                            }
-                            HapticFeedback.lightImpact();
-                          },
-                          onLongPress: () {
-                            _toggleFlag(row, col);
-                            HapticFeedback.mediumImpact();
-                          },
-                          child: Center(
-                            child: cell.isRevealed
-                                ? (cell.isMine
-                                    ? const Icon(Icons.close,
-                                        color: Colors.white, size: 20)
-                                    : (cell.adjacentMines > 0
-                                        ? Text(
-                                            '${cell.adjacentMines}',
-                                            style: TextStyle(
-                                              color: _getNumberColor(
-                                                  cell.adjacentMines),
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
+                        itemCount: _rows * _cols,
+                        itemBuilder: (context, index) {
+                          final row = index ~/ _cols;
+                          final col = index % _cols;
+                          final cell = _grid[row][col];
+
+                          return Container(
+                            margin: const EdgeInsets.all(1.5),
+                            decoration: BoxDecoration(
+                              color: cell.isRevealed
+                                  ? (cell.isMine
+                                      ? Colors.red.withOpacity(0.9)
+                                      : MinefieldApp.spotifyLightGrey
+                                          .withOpacity(0.95))
+                                  : MinefieldApp.spotifyGrey.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: cell.isFlagged
+                                    ? MinefieldApp.spotifyGreen
+                                    : Colors.black.withOpacity(0.1),
+                                width: cell.isFlagged ? 2 : 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.15),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(6),
+                                onTap: () {
+                                  if (_isFlagMode) {
+                                    _toggleFlag(row, col);
+                                  } else {
+                                    _revealCell(row, col);
+                                  }
+                                  HapticFeedback.lightImpact();
+                                },
+                                onLongPress: () {
+                                  _toggleFlag(row, col);
+                                  HapticFeedback.mediumImpact();
+                                },
+                                child: Center(
+                                  child: cell.isRevealed
+                                      ? (cell.isMine
+                                          ? const Icon(Icons.close,
+                                              color: Colors.white, size: 20)
+                                          : (cell.adjacentMines > 0
+                                              ? Text(
+                                                  '${cell.adjacentMines}',
+                                                  style: TextStyle(
+                                                    color: _getNumberColor(
+                                                        cell.adjacentMines),
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                    shadows: [
+                                                      Shadow(
+                                                        color: Colors.black
+                                                            .withOpacity(0.2),
+                                                        blurRadius: 1,
+                                                        offset: const Offset(
+                                                            0.5, 0.5),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                              : null))
+                                      : (cell.isFlagged
+                                          ? Icon(
+                                              Icons.flag,
+                                              color: MinefieldApp.spotifyGreen,
+                                              size: 18,
                                               shadows: [
                                                 Shadow(
                                                   color: Colors.black
@@ -1551,70 +1648,73 @@ class _GameScreenState extends State<GameScreen> {
                                                       const Offset(0.5, 0.5),
                                                 ),
                                               ],
-                                            ),
-                                          )
-                                        : null))
-                                : (cell.isFlagged
-                                    ? Icon(
-                                        Icons.flag,
-                                        color: MinefieldApp.spotifyGreen,
-                                        size: 18,
-                                        shadows: [
-                                          Shadow(
-                                            color:
-                                                Colors.black.withOpacity(0.2),
-                                            blurRadius: 1,
-                                            offset: const Offset(0.5, 0.5),
-                                          ),
-                                        ],
-                                      )
-                                    : null),
+                                            )
+                                          : null),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _isFlagMode = !_isFlagMode;
+                          });
+                          HapticFeedback.mediumImpact();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _isFlagMode
+                              ? MinefieldApp.spotifyGreen
+                              : MinefieldApp.spotifyGrey,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.flag,
+                              color: _isFlagMode
+                                  ? Colors.white
+                                  : MinefieldApp.spotifyGreen,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _isFlagMode
+                                  ? AppLocalizations.get('flag_mode_on')
+                                  : AppLocalizations.get('flag_mode'),
+                              style: TextStyle(
+                                color: _isFlagMode
+                                    ? Colors.white
+                                    : Colors.grey[200],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              // Bayrak modu butonu
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _isFlagMode = !_isFlagMode;
-                    });
-                    HapticFeedback.mediumImpact();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isFlagMode
-                        ? MinefieldApp.spotifyGreen
-                        : MinefieldApp.spotifyGrey,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: Icon(
-                    Icons.flag,
-                    color:
-                        _isFlagMode ? Colors.white : MinefieldApp.spotifyGreen,
-                  ),
-                  label: Text(
-                    _isFlagMode
-                        ? AppLocalizations.get('flag_mode_on')
-                        : AppLocalizations.get('flag_mode'),
-                    style: TextStyle(
-                      color: _isFlagMode ? Colors.white : Colors.grey[200],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (_isBottomBannerAdReady)
+            Container(
+              width: _bottomBannerAd!.size.width.toDouble(),
+              height: _bottomBannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bottomBannerAd!),
+            ),
+        ],
       ),
     );
   }
