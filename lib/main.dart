@@ -1495,19 +1495,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      final startTime = DateTime.now().millisecondsSinceEpoch;
-
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => GameScreen(
             mode: GameMode.easy,
             isOnline: true,
-            onGameComplete: (score) async {
+            onGameComplete: (gameTime) async {
+              // GameScreen'den gelen gerçek süre
               try {
-                final endTime = DateTime.now().millisecondsSinceEpoch;
-                final duration = (endTime - startTime) ~/ 1000;
-
                 // Kullanıcının mevcut skorunu kontrol et
                 final userScoresSnapshot = await _database
                     .child('scores')
@@ -1526,14 +1522,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 }
 
-                // Yeni skor daha iyiyse (daha düşükse) veya mevcut skor yoksa kaydet
-                if (existingScore == null || duration < existingScore!) {
+                // Yeni skor daha iyiyse veya ilk skorsa kaydet
+                if (existingScore == null || gameTime < existingScore!) {
                   final scoreData = {
                     'userId': _currentUser!.uid,
                     'userName': _currentUser!.displayName,
                     'photoURL': _currentUser!.photoURL,
-                    'score': duration,
-                    'timestamp': endTime,
+                    'score': gameTime,
+                    'timestamp': DateTime.now().millisecondsSinceEpoch,
                   };
 
                   if (existingScoreKey != null) {
@@ -1546,7 +1542,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                              'Yeni rekor! Önceki: $existingScore sn -> Yeni: $duration sn'),
+                              'Yeni rekor! Önceki: $existingScore sn -> Yeni: $gameTime sn'),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -1557,7 +1553,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('İlk skorunuz: $duration saniye'),
+                          content: Text('İlk skorunuz: $gameTime saniye'),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -1568,14 +1564,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                            'Daha iyi bir rekorunuz var: $existingScore saniye > $duration saniye'),
+                            'Daha iyi bir rekorunuz var: $existingScore saniye'),
                         backgroundColor: Colors.orange,
                       ),
                     );
                   }
                 }
-
-                debugPrint('Score process completed: $duration seconds');
               } catch (e) {
                 debugPrint('Error saving score: $e');
                 if (context.mounted) {
