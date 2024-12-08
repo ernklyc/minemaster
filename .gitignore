@@ -47,3 +47,17 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Hide android and lib folders
+/android/
+/lib/
+
+# Keep specific files public if needed
+!/android/app/src/main/AndroidManifest.xml
+!/android/app/build.gradle
+!/lib/README.md
+
+# Hide sensitive information
+google-services.json
+key.properties
+upload-keystore.jks
