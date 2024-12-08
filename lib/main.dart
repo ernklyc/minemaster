@@ -61,7 +61,7 @@ class AppLocalizations {
       'tutorial_title': 'Nasıl Oynanır?',
       'basic_controls_title': 'Temel Kontroller',
       'basic_controls_content':
-          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak için alttaki butonu kullan',
+          '• Güvenli kareyi açmak için dokun\n• Bayrak koymak için uzun bas\n• Bayrak modunu açmak i��in alttaki butonu kullan',
       'numbers_title': 'Sayıların Anlamı',
       'numbers_content':
           '• Sayılar çevredeki mayın sayısını gösterir\n• 1: Çevrede 1 mayın var\n• 2: Çevrede 2 mayın var\n• Boş kareler güvenli bölgeyi gösterir',
@@ -1767,12 +1767,16 @@ class _GameScreenState extends State<GameScreen> {
       ),
       body: Column(
         children: [
-          if (_isBannerAdReady)
-            Container(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
+          SizedBox(
+            height: 50,
+            child: _isBannerAdReady
+                ? Container(
+                    width: _bannerAd!.size.width.toDouble(),
+                    height: _bannerAd!.size.height.toDouble(),
+                    child: AdWidget(ad: _bannerAd!),
+                  )
+                : const SizedBox(),
+          ),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -1944,12 +1948,16 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-          if (_isBottomBannerAdReady)
-            Container(
-              width: _bottomBannerAd!.size.width.toDouble(),
-              height: _bottomBannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bottomBannerAd!),
-            ),
+          SizedBox(
+            height: 50,
+            child: _isBottomBannerAdReady
+                ? Container(
+                    width: _bottomBannerAd!.size.width.toDouble(),
+                    height: _bottomBannerAd!.size.height.toDouble(),
+                    child: AdWidget(ad: _bottomBannerAd!),
+                  )
+                : const SizedBox(),
+          ),
         ],
       ),
     );
