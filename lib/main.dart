@@ -1661,11 +1661,17 @@ class _GameScreenState extends State<GameScreen> {
                           onPressed: () async {
                             final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
                             if (homeScreenState != null) {
+                              // Ana ekrana dönmeden önce yüksek skorları güncelle
                               await homeScreenState._loadHighScores();
                               homeScreenState.setState(() {});
                             }
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                            // Ana ekrana dön
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
+                              ),
+                            );
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.transparent,
@@ -1691,9 +1697,11 @@ class _GameScreenState extends State<GameScreen> {
                           onPressed: () async {
                             final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
                             if (homeScreenState != null) {
+                              // Yeniden başlamadan önce yüksek skorları güncelle
                               await homeScreenState._loadHighScores();
                               homeScreenState.setState(() {});
                             }
+                            // Dialog'u kapat ve oyunu yeniden başlat
                             Navigator.pop(context);
                             setState(() {
                               _initializeGame();
