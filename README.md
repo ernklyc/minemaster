@@ -1,5 +1,7 @@
 # minemaster
 
+.gitignore -> android/, lib/
+
 A new Flutter project.
 
 ## Getting Started
