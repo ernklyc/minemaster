@@ -1478,7 +1478,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => GameScreen(
-            mode: GameMode.medium,
+            mode: GameMode.easy,
             isOnline: true,
             onGameComplete: (score) async {
               try {
