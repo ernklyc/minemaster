@@ -1,15 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:minemaster/ad_helper.dart';
+import 'package:minemaster/firebase_options.dart';
 import 'dart:math';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 enum Language { tr, en }
 
@@ -179,16 +183,23 @@ class AppLocalizations {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
   try {
+    // Firebase'i başlatmayı dene
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+    
+    // MobileAds'i başlat
     await MobileAds.instance.initialize();
     debugPrint('MobileAds initialized successfully');
   } catch (e) {
-    debugPrint('Error initializing MobileAds: $e');
+    debugPrint('Error during initialization: $e');
   }
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   runApp(const MinefieldApp());
 }
 
@@ -265,11 +276,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<HighScore> highScores = [];
   late SharedPreferences prefs;
+  User? _currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
     super.initState();
     _initPrefs();
+    _checkCurrentUser();
   }
 
   Future<void> _initPrefs() async {
@@ -776,95 +791,161 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 48),
 
-                    // Sağ alt köşedeki butonlar
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Nasıl Oynanır butonu
-                          Container(
-                            decoration: BoxDecoration(
-                              color: MinefieldApp.spotifyGrey,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: MinefieldApp.spotifyGreen,
-                                width: 2,
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.help_outline,
-                                color: MinefieldApp.spotifyGreen,
-                              ),
-                              onPressed: _showTutorial,
+                    // Google ile giriş butonu (eğer giriş yapılmamışsa)
+                    if (_currentUser == null) ...[
+                      const SizedBox(height: 12),
+                      _buildMenuButton(
+                        'Google ile Bağlan',
+                        Icons.login,
+                        _handleGoogleSignIn,
+                      ),
+                    ],
+
+                    const SizedBox(height: 48),
+
+                    // Alt butonlar
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Nasıl Oynanır butonu
+                        Container(
+                          decoration: BoxDecoration(
+                            color: MinefieldApp.spotifyGrey,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: MinefieldApp.spotifyGreen,
+                              width: 2,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // Dil değiştirme butonu
-                          Container(
-                            decoration: BoxDecoration(
-                              color: MinefieldApp.spotifyGrey,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: MinefieldApp.spotifyGreen,
-                                width: 2,
-                              ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.help_outline,
+                              color: MinefieldApp.spotifyGreen,
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () {
-                                  setState(() {
-                                    AppLocalizations.currentLanguage =
-                                        AppLocalizations.currentLanguage ==
-                                                Language.tr
-                                            ? Language.en
-                                            : Language.tr;
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  child: Text(
-                                    AppLocalizations.currentLanguage ==
-                                            Language.tr
-                                        ? 'TR'
-                                        : 'EN',
-                                    style: const TextStyle(
-                                      color: MinefieldApp.spotifyGreen,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
+                            onPressed: _showTutorial,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Dil değiştirme butonu
+                        Container(
+                          decoration: BoxDecoration(
+                            color: MinefieldApp.spotifyGrey,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: MinefieldApp.spotifyGreen,
+                              width: 2,
+                            ),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () {
+                                setState(() {
+                                  AppLocalizations.currentLanguage =
+                                      AppLocalizations.currentLanguage == Language.tr
+                                          ? Language.en
+                                          : Language.tr;
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                child: Text(
+                                  AppLocalizations.currentLanguage == Language.tr
+                                      ? 'TR'
+                                      : 'EN',
+                                  style: const TextStyle(
+                                    color: MinefieldApp.spotifyGreen,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          // Geliştirici butonu
-                          Container(
-                            decoration: BoxDecoration(
-                              color: MinefieldApp.spotifyGrey,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: MinefieldApp.spotifyGreen,
-                                width: 2,
-                              ),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.code,
-                                color: MinefieldApp.spotifyGreen,
-                              ),
-                              onPressed: _showDeveloperInfo,
+                        ),
+                        const SizedBox(width: 8),
+                        // Geliştirici butonu
+                        Container(
+                          decoration: BoxDecoration(
+                            color: MinefieldApp.spotifyGrey,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: MinefieldApp.spotifyGreen,
+                              width: 2,
                             ),
                           ),
-                        ],
-                      ),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.code,
+                              color: MinefieldApp.spotifyGreen,
+                            ),
+                            onPressed: _showDeveloperInfo,
+                          ),
+                        ),
+                      ],
                     ),
+
+                    // Kullanıcı profili (eğer giriş yapılmışsa)
+                    if (_currentUser != null) ...[
+                      const SizedBox(height: 24),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: MinefieldApp.spotifyGrey,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: MinefieldApp.spotifyGreen.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Profil fotosu
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: _currentUser?.photoURL != null
+                                  ? NetworkImage(_currentUser!.photoURL!)
+                                  : null,
+                              child: _currentUser?.photoURL == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
+                            // Kullanıcı bilgileri
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _currentUser?.displayName ?? 'Kullanıcı',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    _currentUser?.email ?? '',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Çıkış butonu
+                            IconButton(
+                              icon: const Icon(
+                                Icons.logout,
+                                color: MinefieldApp.spotifyGreen,
+                              ),
+                              onPressed: _handleSignOut,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1236,6 +1317,68 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didPopNext() {
     _loadHighScores();
+  }
+
+  // Kullanıcı kontrolü
+  Future<void> _checkCurrentUser() async {
+    try {
+      _currentUser = FirebaseAuth.instance.currentUser;
+      setState(() {});
+    } catch (e) {
+      debugPrint('Error checking current user: $e');
+    }
+  }
+
+  // Google ile giriş fonksiyonu
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = 
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      
+      setState(() {
+        _currentUser = userCredential.user;
+      });
+    } catch (e) {
+      debugPrint('Error during Google sign in: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Giriş yapılırken hata oluştu: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Çıkış yapma fonksiyonu
+  Future<void> _handleSignOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      await _googleSignIn.signOut();
+      setState(() {
+        _currentUser = null;
+      });
+    } catch (e) {
+      debugPrint('Error during sign out: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Çıkış yapılırken hata oluştu: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

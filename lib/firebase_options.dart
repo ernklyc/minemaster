@@ -18,8 +18,7 @@ class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
       throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
+        'Web platformu için DefaultFirebaseOptions yapılandırılmamış.',
       );
     }
     switch (defaultTargetPlatform) {
@@ -27,36 +26,32 @@ class DefaultFirebaseOptions {
         return android;
       case TargetPlatform.iOS:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+          'iOS platformu için DefaultFirebaseOptions yapılandırılmamış.',
         );
       case TargetPlatform.macOS:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+          'macOS platformu için DefaultFirebaseOptions yapılandırılmamış.',
         );
       case TargetPlatform.windows:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+          'Windows platformu için DefaultFirebaseOptions yapılandırılmamış.',
         );
       case TargetPlatform.linux:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+          'Linux platformu için DefaultFirebaseOptions yapılandırılmamış.',
         );
       default:
         throw UnsupportedError(
-          'DefaultFirebaseOptions are not supported for this platform.',
+          'Bu platform için DefaultFirebaseOptions yapılandırılmamış.',
         );
     }
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDb9Sia4ggEmAoY5BEBUHDo8hFdWn7Pa_g',
-    appId: '1:642891441591:android:a95af586b27f29cec9f432',
-    messagingSenderId: '642891441591',
+    apiKey: 'YOUR-ACTUAL-API-KEY',
+    appId: 'YOUR-ACTUAL-APP-ID',
+    messagingSenderId: 'YOUR-ACTUAL-SENDER-ID',
     projectId: 'mf-master-online',
-    storageBucket: 'mf-master-online.firebasestorage.app',
+    storageBucket: 'YOUR-ACTUAL-STORAGE-BUCKET',
   );
 }
