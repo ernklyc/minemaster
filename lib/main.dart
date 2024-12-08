@@ -88,16 +88,16 @@ class AppLocalizations {
       'score_date': 'Tarih',
       'score_time': 'Süre',
       'play_offline': 'Oyuna Başla',
-      'play_online': 'Online Oyna (Yakında)',
+      'play_online': 'Online Oyna',
       'online_leaderboard': 'Online Sıralama',
       'your_rank': 'Sıralamanız',
       'rank': 'Sıra',
       'player': 'Oyuncu',
       'score': 'Skor',
-      'play_online_soon': 'Online Mod Yakında!',
+      'play_online_soon': 'Online Mod',
       'global_players': 'Tüm Oyuncular',
       'join_online': 'Online Oyuna Katıl',
-      'coming_soon': 'Yakında...',
+      'coming_soon': '',
     },
     'en': {
       'app_name': 'MF MASTER ONLINE',
@@ -158,16 +158,16 @@ class AppLocalizations {
       'score_date': 'Date',
       'score_time': 'Time',
       'play_offline': 'Play Game',
-      'play_online': 'Play Online (Coming Soon)',
+      'play_online': 'Play Online',
       'online_leaderboard': 'Online Leaderboard',
       'your_rank': 'Your Rank',
       'rank': 'Rank',
       'player': 'Player',
       'score': 'Score',
-      'play_online_soon': 'Online Mode Coming Soon!',
+      'play_online_soon': 'Online Mode',
       'global_players': 'Global Players',
       'join_online': 'Join Online Game',
-      'coming_soon': 'Coming Soon...',
+      'coming_soon': '',
     },
   };
 
@@ -1338,12 +1338,14 @@ class _GameScreenState extends State<GameScreen> {
       scores.sort((a, b) => a.time.compareTo(b.time));
 
       // En iyi 3 skoru al
-      final topScores = scores.take(3).map((score) => jsonEncode(score.toJson())).toList();
+      final topScores =
+          scores.take(3).map((score) => jsonEncode(score.toJson())).toList();
       await prefs.setStringList('highScores', topScores);
 
       // HomeScreen'deki yüksek skorları güncelle
       if (context.mounted) {
-        final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
+        final homeScreenState =
+            context.findAncestorStateOfType<_HomeScreenState>();
         if (homeScreenState != null) {
           // Ana ekranı hemen güncelle
           setState(() {
@@ -1596,8 +1598,8 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   const SizedBox(height: 24),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
                     decoration: BoxDecoration(
                       color: MinefieldApp.spotifyBlack,
                       borderRadius: BorderRadius.circular(12),
@@ -1607,15 +1609,17 @@ class _GameScreenState extends State<GameScreen> {
                       children: [
                         Icon(
                           Icons.timer,
-                          color: isWin ? MinefieldApp.spotifyGreen : Colors.grey,
+                          color:
+                              isWin ? MinefieldApp.spotifyGreen : Colors.grey,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           '$_time ${AppLocalizations.get('seconds')}',
                           style: TextStyle(
-                            color:
-                                isWin ? MinefieldApp.spotifyGreen : Colors.white,
+                            color: isWin
+                                ? MinefieldApp.spotifyGreen
+                                : Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1626,8 +1630,8 @@ class _GameScreenState extends State<GameScreen> {
                   if (isWin && highScores.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
                       decoration: BoxDecoration(
                         color: MinefieldApp.spotifyGreen.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -1659,7 +1663,8 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: TextButton(
                           onPressed: () async {
-                            final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
+                            final homeScreenState = context
+                                .findAncestorStateOfType<_HomeScreenState>();
                             if (homeScreenState != null) {
                               // Ana ekrana dönmeden önce yüksek skorları güncelle
                               await homeScreenState._loadHighScores();
@@ -1695,7 +1700,8 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final homeScreenState = context.findAncestorStateOfType<_HomeScreenState>();
+                            final homeScreenState = context
+                                .findAncestorStateOfType<_HomeScreenState>();
                             if (homeScreenState != null) {
                               // Yeniden başlamadan önce yüksek skorları güncelle
                               await homeScreenState._loadHighScores();
