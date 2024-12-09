@@ -37,6 +37,9 @@ class AppLocalizations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'tr': {
       'app_name': 'MF MASTER ONLINE',
+      'delete_scores': 'Skorları Sıfırla',
+      'antet': 'Dikkat!',
+      'delete_scores_desc': 'Tüm yüksek skorları sıfırlayacak',
       'game_description': 'Güçlendirilmiş Mayın Tarlası',
       'play': 'Online Oyuna Başla',
       'high_scores': 'Offline Yüksek Skorlar',
@@ -110,6 +113,9 @@ class AppLocalizations {
     },
     'en': {
       'app_name': 'MF MASTER ONLINE',
+      'delete_scores': 'Reset High Scores',
+      'delete_scores_desc': 'All high scores will be deleted',
+      'antet': 'Attention!',
       'game_description': 'Enhanced Minesweeper',
       'play': 'Offline Play Game',
       'high_scores': 'Offline High Scores',
@@ -528,26 +534,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${score.time} ${AppLocalizations.get("seconds")}',
-                                style: TextStyle(
-                                  color: index == 0
-                                      ? MinefieldApp.spotifyGreen
-                                      : Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                _formatDate(score.date),
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            '${score.time} ${AppLocalizations.get("seconds")}',
+                            style: TextStyle(
+                              color: index == 0
+                                  ? MinefieldApp.spotifyGreen
+                                  : Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -556,11 +550,147 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              AppLocalizations.get('close_button'),
-              style: const TextStyle(color: MinefieldApp.spotifyGreen),
+          // Sıfırlama butonu
+          if (highScores.isNotEmpty)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: TextButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: MinefieldApp.spotifyGrey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      title: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.red,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            AppLocalizations.get('antet'),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      content: Text(
+                        AppLocalizations.get('delete_scores_desc'),
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                          height: 1.5,
+                        ),
+                      ),
+                      actions: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: BorderSide(color: Colors.grey[600]!),
+                                  ),
+                                ),
+                                child: Text(
+                                  AppLocalizations.get('close'),
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () async {
+                                  await prefs.remove('highScores');
+                                  setState(() {
+                                    highScores.clear();
+                                  });
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.red.withOpacity(0.1),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: const BorderSide(color: Colors.red),
+                                  ),
+                                ),
+                                child: Text(
+                                  AppLocalizations.get('delete_scores'),
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: const BorderSide(color: Colors.red),
+                  ),
+                ),
+                icon: const Icon(Icons.delete_forever, color: Colors.red),
+                label: Text(
+                  AppLocalizations.get('delete_scores'),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                backgroundColor: MinefieldApp.spotifyGreen.withOpacity(0.1),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: const BorderSide(color: MinefieldApp.spotifyGreen),
+                ),
+              ),
+              child: Text(
+                AppLocalizations.get('close_button'),
+                style: const TextStyle(
+                  color: MinefieldApp.spotifyGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],
@@ -2007,7 +2137,7 @@ class _GameScreenState extends State<GameScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '$_time ${AppLocalizations.get('seconds')}',
+                          '$_time ${AppLocalizations.get("seconds")}',
                           style: TextStyle(
                             color: isWin
                                 ? MinefieldApp.spotifyGreen
@@ -2078,16 +2208,13 @@ class _GameScreenState extends State<GameScreen> {
                               side: BorderSide(color: Colors.grey[600]!),
                             ),
                           ),
-                          child: Icon(Icons.home,
-                              color: Colors.grey[400], size: 20),
-                          //Text(
-                          //AppLocalizations.get('menu'),
-                          //style: TextStyle(
-                          //  color: Colors.grey[400],
-                          //  fontSize: 14,
-                          //  fontWeight: FontWeight.bold,
-                          //),
-                          //),
+                          child: Text(
+                            AppLocalizations.get('close'),
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2114,20 +2241,14 @@ class _GameScreenState extends State<GameScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Icon(
-                            Icons.loop_outlined,
-                            color: Colors.white,
-                            size: 20,
+                          child: Text(
+                            AppLocalizations.get('play_again'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        //Text(
-                        //AppLocalizations.get('play_again'),
-                        //style: const TextStyle(
-                        //  color: Colors.white,
-                        //  fontSize: 14,
-                        //  fontWeight: FontWeight.bold,
-                        //),
-                        //),
                       ),
                     ],
                   ),
