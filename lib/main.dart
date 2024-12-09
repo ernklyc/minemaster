@@ -40,6 +40,9 @@ class AppLocalizations {
       'game_description': 'Güçlendirilmiş Mayın Tarlası',
       'play': 'Online Oyuna Başla',
       'high_scores': 'Offline Yüksek Skorlar',
+      'connect_google': 'Google ile Bağlan',
+      'connecting_google': 'Oynamak için google hesabınızla giriş yapın...',
+      'connect_google_desc': 'Google hesabınızla oyunu başlatın',
       'how_to_play': 'Nasıl Oynanır?',
       'developer': 'Geliştirici',
       'basic_controls': 'Temel Kontroller',
@@ -111,6 +114,9 @@ class AppLocalizations {
       'play': 'Offline Play Game',
       'high_scores': 'Offline High Scores',
       'how_to_play': 'How to Play',
+      'connect_google': 'Connect with Google',
+      'connecting_google': 'Log in with your Google account to play...',
+      'connect_google_desc': 'Start the game with your Google account',
       'developer': 'Developer',
       'basic_controls': 'Basic Controls',
       'basic_controls_desc':
@@ -797,7 +803,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icons.emoji_events,
                       _showHighScores,
                     ),
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 12),
+
+                    const Divider(color: Colors.green),
 
                     // Google ile giriş butonu (eğer giriş yapılmamışsa)
                     if (_currentUser == null) ...[
@@ -805,9 +813,69 @@ class _HomeScreenState extends State<HomeScreen> {
                       _buildGoogleSignInButton(),
                     ],
 
-                    const SizedBox(height: 48),
+                    // Kullanıcı profili (eğer giriş yapılmışsa)
+                    if (_currentUser != null) ...[
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: MinefieldApp.spotifyGrey,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: MinefieldApp.spotifyGreen.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            // Profil fotosu
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: _currentUser?.photoURL != null
+                                  ? NetworkImage(_currentUser!.photoURL!)
+                                  : null,
+                              child: _currentUser?.photoURL == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
+                            // Kullanıcı bilgileri
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _currentUser?.displayName ?? 'Kullanıcı',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    _currentUser?.email ?? '',
+                                    style: TextStyle(
+                                      color: Colors.grey[400],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Çıkış butonu
+                            IconButton(
+                              icon: const Icon(
+                                Icons.logout,
+                                color: MinefieldApp.spotifyGreen,
+                              ),
+                              onPressed: _handleSignOut,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
 
+                    const SizedBox(height: 48),
                     // Alt butonlar
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -892,66 +960,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-
-                    // Kullanıcı profili (eğer giriş yapılmışsa)
-                    if (_currentUser != null) ...[
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: MinefieldApp.spotifyGrey,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: MinefieldApp.spotifyGreen.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            // Profil fotosu
-                            CircleAvatar(
-                              radius: 20,
-                              backgroundImage: _currentUser?.photoURL != null
-                                  ? NetworkImage(_currentUser!.photoURL!)
-                                  : null,
-                              child: _currentUser?.photoURL == null
-                                  ? const Icon(Icons.person)
-                                  : null,
-                            ),
-                            const SizedBox(width: 12),
-                            // Kullanıcı bilgileri
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _currentUser?.displayName ?? 'Kullanıcı',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    _currentUser?.email ?? '',
-                                    style: TextStyle(
-                                      color: Colors.grey[400],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Çıkış butonu
-                            IconButton(
-                              icon: const Icon(
-                                Icons.logout,
-                                color: MinefieldApp.spotifyGreen,
-                              ),
-                              onPressed: _handleSignOut,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -1183,10 +1191,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       final event = snapshot.data as DatabaseEvent;
                       final scores = <Map<String, dynamic>>[];
 
-                      event.snapshot.children.forEach((child) {
+                      for (var child in event.snapshot.children) {
                         scores
                             .add(Map<String, dynamic>.from(child.value as Map));
-                      });
+                      }
 
                       scores.sort((a, b) =>
                           (a['score'] as int).compareTo(b['score'] as int));
@@ -1263,15 +1271,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: MinefieldApp.spotifyBlack,
                   borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(20)),
+                      BorderRadius.vertical(bottom: Radius.circular(20)),
                 ),
                 child: Column(
                   children: [
                     if (_currentUser != null) ...[
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _startOnlineGame,
@@ -1312,7 +1320,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          'Online oynamak için giriş yapın',
+                          AppLocalizations.get('connecting_google'),
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 14,
@@ -1446,15 +1454,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: const Text(
-                  'Google ile Bağlanılıyor...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
               ),
               const SizedBox(width: 12),
               // Google ikonu
@@ -1464,7 +1463,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.g_mobiledata,
                   color: MinefieldApp.spotifyGreen,
                   size: 24,
@@ -1477,7 +1476,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return _buildMenuButton(
-      'Google ile Bağlan',
+      AppLocalizations.get('connect_google'),
       Icons.login,
       _handleGoogleSignIn,
     );
@@ -2079,14 +2078,16 @@ class _GameScreenState extends State<GameScreen> {
                               side: BorderSide(color: Colors.grey[600]!),
                             ),
                           ),
-                          child: Text(
-                            AppLocalizations.get('menu'),
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child: Icon(Icons.home,
+                              color: Colors.grey[400], size: 20),
+                          //Text(
+                          //AppLocalizations.get('menu'),
+                          //style: TextStyle(
+                          //  color: Colors.grey[400],
+                          //  fontSize: 14,
+                          //  fontWeight: FontWeight.bold,
+                          //),
+                          //),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -2113,15 +2114,20 @@ class _GameScreenState extends State<GameScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text(
-                            AppLocalizations.get('play_again'),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Icon(
+                            Icons.loop_outlined,
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
+                        //Text(
+                        //AppLocalizations.get('play_again'),
+                        //style: const TextStyle(
+                        //  color: Colors.white,
+                        //  fontSize: 14,
+                        //  fontWeight: FontWeight.bold,
+                        //),
+                        //),
                       ),
                     ],
                   ),
@@ -2224,7 +2230,7 @@ class _GameScreenState extends State<GameScreen> {
               height: 50, // Banner reklam yüksekliği
               alignment: Alignment.center,
               child: _isBannerAdReady
-                  ? Container(
+                  ? SizedBox(
                       width: _bannerAd!.size.width.toDouble(),
                       height: _bannerAd!.size.height.toDouble(),
                       child: AdWidget(ad: _bannerAd!),
@@ -2414,7 +2420,7 @@ class _GameScreenState extends State<GameScreen> {
               height: 50, // Banner reklam yüksekliği
               alignment: Alignment.center,
               child: _isBottomBannerAdReady
-                  ? Container(
+                  ? SizedBox(
                       width: _bottomBannerAd!.size.width.toDouble(),
                       height: _bottomBannerAd!.size.height.toDouble(),
                       child: AdWidget(ad: _bottomBannerAd!),
