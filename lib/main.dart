@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_field, unnecessary_import, unused_element, empty_catches, deprecated_member_use
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -110,6 +110,8 @@ class AppLocalizations {
       'global_players': 'Tüm Oyuncular',
       'join_online': 'Online Oyuna Katıl',
       'coming_soon': '',
+      'score_list_lb': 'Skorunuz ilk 100\'e giremedi:',
+      'score_list_lb_sn': 'saniye',
     },
     'en': {
       'app_name': 'MF MASTER ONLINE',
@@ -186,6 +188,8 @@ class AppLocalizations {
       'global_players': 'Global Players',
       'join_online': 'Join Online Game',
       'coming_soon': '',
+      'score_list_lb': 'Your score did not enter the top 100:',
+      'score_list_lb_sn': 'seconds',
     },
   };
 
@@ -1314,7 +1318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   stream: _database
                       .child('scores')
                       .orderByChild('score')
-                      .limitToFirst(100)
+                      .limitToFirst(100)//limit 100
                       .onValue,
                   builder: (context, snapshot) {
                     if (snapshot.hasData && !snapshot.hasError) {
@@ -1469,6 +1473,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  // ignore: override_on_non_overriding_member
   void didPopNext() {
     _loadHighScores();
   }
@@ -1631,8 +1636,37 @@ class _HomeScreenState extends State<HomeScreen> {
             mode: GameMode.easy,
             isOnline: true,
             onGameComplete: (gameTime) async {
-              // GameScreen'den gelen gerçek süre
               try {
+                // Önce mevcut skorları sayısını ve en kötü skoru kontrol et
+                final scoresSnapshot = await _database.child('scores').get();
+                
+                if (scoresSnapshot.exists) {
+                  final scores = Map<String, dynamic>.from(scoresSnapshot.value as Map);
+                  
+                  // Eğer 100'den fazla skor varsa ve yeni skor en kötü skordan daha kötüyse kaydetme
+                  if (scores.length >= 100) {
+                    // Skorları sıralayıp en kötü skoru bul
+                    var scoresList = scores.entries
+                        .map((e) => Map<String, dynamic>.from(e.value as Map))
+                        .toList();
+                    scoresList.sort((a, b) => (a['score'] as int).compareTo(b['score'] as int));
+                    
+                    final worstScore = scoresList.last['score'] as int;
+                    
+                    if (gameTime >= worstScore) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${AppLocalizations.get('score_list_lb')} $gameTime ${AppLocalizations.get('score_list_lb_sn')}'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                      return; // Skoru kaydetmeden çık
+                    }
+                  }
+                }
+
                 // Kullanıcının mevcut skorunu kontrol et
                 final userScoresSnapshot = await _database
                     .child('scores')
