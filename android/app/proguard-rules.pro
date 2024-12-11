@@ -39,4 +39,23 @@
 # R8 full mode için ek kurallar
 -keepattributes SourceFile,LineNumberTable,Exceptions
 -keep class io.flutter.app.FlutterPlayStoreSplitApplication { *; }
--keep class io.flutter.embedding.engine.deferredcomponents.** { *; } 
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+
+# Firebase rules
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+# Play Core Library
+-keep class com.google.android.play.core.** { *; }
+
+# AdMob rules
+-keep public class com.google.android.gms.ads.** {
+    public *;
+}
+
+# Your app specific rules
+-keep class com.yourdomain.app.** { *; }
+-keepclassmembers class com.yourdomain.app.** { *; }
+
+# Prevent name obfuscation for model classes
+-keepclassmembers class **.model.** { *; } 

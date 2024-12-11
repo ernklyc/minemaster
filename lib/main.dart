@@ -199,6 +199,12 @@ class AppLocalizations {
   }
 }
 
+// Hassas bilgileri ayrı bir dosyada tutun
+class SecurityConfig {
+  static const String apiKey = String.fromEnvironment('API_KEY', defaultValue: '');
+  // Diğer hassas bilgiler...
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
