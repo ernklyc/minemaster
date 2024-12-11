@@ -27,7 +27,7 @@
 -keep class io.flutter.** { *; }
 
 # Keep your model classes
--keep class com.example.minemaster.** { *; }
+-keep class com.yelbegen.minemaster.** { *; }
 
 # Play Core için keep kuralları
 -keep class com.google.android.play.core.** { *; }

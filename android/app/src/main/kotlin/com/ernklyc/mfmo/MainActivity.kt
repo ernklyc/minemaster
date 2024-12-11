@@ -1,4 +1,4 @@
-package com.example.minemaster
+package com.yelbegen.minemaster
 
 import io.flutter.embedding.android.FlutterActivity
 

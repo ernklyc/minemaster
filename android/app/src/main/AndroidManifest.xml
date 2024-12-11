@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.yelbegen.minemaster">
     
     <uses-sdk tools:overrideLibrary="io.flutter.plugins.firebase.auth"/>
     <uses-permission android:name="android.permission.INTERNET"/>
