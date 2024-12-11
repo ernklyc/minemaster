@@ -53,10 +53,6 @@ android {
                          'proguard-rules.pro'
         }
     }
-
-    configurations {
-        all*.exclude group: 'com.google.android.play', module: 'core-common'
-    }
 }
 
 flutter {
@@ -70,11 +66,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.android.support:multidex:1.0.3'
 
-    //implementation 'com.google.android.play:core:1.10.3'
-    implementation 'com.google.android.play:core-ktx:1.8.1'
-    
-    implementation 'androidx.multidex:multidex:2.0.1'
-
-    implementation 'com.google.android.play:core:1.10.3'
-    implementation 'com.google.android.play:core-common:2.2.0'
+    // Yeni Play In-App Update API'sini ekle
+    implementation 'com.google.android.play:app-update:2.1.0'
+    implementation 'com.google.android.play:app-update-ktx:2.1.0'
+    implementation 'com.google.android.play:core-common:2.0.3'
 }

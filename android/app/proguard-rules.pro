@@ -58,4 +58,23 @@
 -keepclassmembers class com.yourdomain.app.** { *; }
 
 # Prevent name obfuscation for model classes
--keepclassmembers class **.model.** { *; } 
+-keepclassmembers class **.model.** { *; }
+
+# Play Core ve Play In-App Update için keep kuralları
+-keep class com.google.android.play.core.common.** { *; }
+-keep class com.google.android.play.core.listener.** { *; }
+-keep class com.google.android.play.core.splitcompat.** { *; }
+-keep class com.google.android.play.core.splitinstall.** { *; }
+-keep class com.google.android.play.core.tasks.** { *; }
+-keep class com.google.android.play.core.appupdate.** { *; }
+
+# Flutter'ın Play Store entegrasyonu için gerekli sınıflar
+-keep class io.flutter.app.FlutterPlayStoreSplitApplication { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+
+# Play Core bağımlılıklarını ekle
+-dontwarn com.google.android.play.core.splitcompat.SplitCompatApplication
+-dontwarn com.google.android.play.core.common.**
+-dontwarn com.google.android.play.core.listener.**
+-dontwarn com.google.android.play.core.splitinstall.**
+-dontwarn com.google.android.play.core.tasks.** 
