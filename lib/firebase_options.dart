@@ -48,10 +48,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR-ACTUAL-API-KEY',
-    appId: 'YOUR-ACTUAL-APP-ID',
-    messagingSenderId: 'YOUR-ACTUAL-SENDER-ID',
+    apiKey: 'AIzaSyDb9Sia4ggEmAoY5BEBUHDo8hFdWn7Pa_g',
+    appId: '1:642891441591:android:ca114581bc44ec6ac9f432',
+    messagingSenderId: '642891441591',
     projectId: 'mf-master-online',
-    storageBucket: 'YOUR-ACTUAL-STORAGE-BUCKET',
+    storageBucket: 'mf-master-online.firebasestorage.app',
+    androidClientId: '642891441591-8ketn88foghou9e8cf2f7lea1ss8t786.apps.googleusercontent.com',
   );
 }

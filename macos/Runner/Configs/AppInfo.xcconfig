@@ -8,7 +8,7 @@
 PRODUCT_NAME = MF Master Online
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.minemaster
+PRODUCT_BUNDLE_IDENTIFIER = com.yelbegen.minemaster
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2024 com.example. All rights reserved.
