@@ -323,12 +323,25 @@ class _HomeScreenState extends State<HomeScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   bool _isSigningIn = false;
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  String _announcementText = ''; // Duyuru metni için değişken
 
   @override
   void initState() {
     super.initState();
     _initPrefs();
     _checkCurrentUser();
+    _listenToAnnouncement(); // Duyuru dinleyicisini başlat
+  }
+
+  // Duyuru metnini dinleme fonksiyonu
+  void _listenToAnnouncement() {
+    _database.child('announcement').onValue.listen((event) {
+      if (event.snapshot.value != null) {
+        setState(() {
+          _announcementText = event.snapshot.value.toString();
+        });
+      }
+    });
   }
 
   Future<void> _initPrefs() async {
@@ -937,6 +950,49 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 36),
+
+                    // Duyuru Metni (eğer varsa)
+                    if (_announcementText.isNotEmpty) ...[
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: MinefieldApp.spotifyGreen.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: MinefieldApp.spotifyGreen.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: MinefieldApp.spotifyGreen.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.campaign,
+                                color: MinefieldApp.spotifyGreen,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _announcementText,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
 
                     // Menü Butonları
                     _buildMenuButton(
@@ -2443,12 +2499,14 @@ class _GameScreenState extends State<GameScreen> {
                               homeScreenState.setState(() {});
                             }
                             // Ana ekrana dön
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
+                            if (context.mounted) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomeScreen(),
+                                ),
+                              );
+                            }
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.transparent,
@@ -2479,10 +2537,12 @@ class _GameScreenState extends State<GameScreen> {
                               homeScreenState.setState(() {});
                             }
                             // Dialog'u kapat ve oyunu yeniden başlat
-                            Navigator.pop(context);
-                            setState(() {
-                              _initializeGame();
-                            });
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                              setState(() {
+                                _initializeGame();
+                              });
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: MinefieldApp.spotifyGreen,
