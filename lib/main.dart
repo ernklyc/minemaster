@@ -1292,7 +1292,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           scheme: 'mailto',
                           path: 'yelbegensoftwarespt@gmail.com',
                           queryParameters: {
-                            'subject': 'MF_Master_Online',
+                            'subject': 'MF⠀Master⠀Online',
                             'body': messageController.text.trim().replaceAll(' ', '_'),
                           },
                         );
@@ -2018,7 +2018,7 @@ class _GameScreenState extends State<GameScreen> {
   late int _flags;
   late int _safeCells;
   late int _time;
-  late Timer _timer;
+  Timer? _timer; // Timer'ı nullable olarak tanımla
   late bool _isGameOver;
   late bool _isGameWon;
   late bool _isFlagMode;
@@ -2157,7 +2157,7 @@ class _GameScreenState extends State<GameScreen> {
       // Oyunu bitir ve dialog'u göster
       _isGameOver = true;
       _isGameWon = true;
-      _timer.cancel();
+      _timer?.cancel(); // Null kontrolü ekle
 
       if (context.mounted) {
         _showGameOverDialog(true);
@@ -2171,7 +2171,7 @@ class _GameScreenState extends State<GameScreen> {
   void dispose() {
     _bannerAd?.dispose();
     _bottomBannerAd?.dispose();
-    _timer.cancel();
+    _timer?.cancel(); // Null kontrolü ekle
     super.dispose();
   }
 
@@ -2277,7 +2277,7 @@ class _GameScreenState extends State<GameScreen> {
 
       if (_grid[row][col].isMine) {
         _isGameOver = true;
-        _timer.cancel();
+        _timer?.cancel(); // Null kontrolü ekle
         _revealAllMines();
         _showGameOverDialog(false);
       } else {
