@@ -112,6 +112,13 @@ class AppLocalizations {
       'coming_soon': '',
       'score_list_lb': 'Skorunuz ilk 100\'e giremedi:',
       'score_list_lb_sn': 'saniye',
+      'support_title': 'Destek & Hata Bildirimi',
+      'write_message': 'Lütfen sorununuzu veya önerinizi yazın...',
+      'cancel': 'İptal',
+      'send': 'Gönder',
+      'message_sent': 'Mesajınız başarıyla gönderildi. Teşekkürler!',
+      'error_occurred': 'Bir hata oluştu',
+      'write_message_warning': 'Lütfen bir mesaj yazın',
     },
     'en': {
       'app_name': 'MF MASTER ONLINE',
@@ -190,6 +197,13 @@ class AppLocalizations {
       'coming_soon': '',
       'score_list_lb': 'Your score did not enter the top 100:',
       'score_list_lb_sn': 'seconds',
+      'support_title': 'Support & Bug Report',
+      'write_message': 'Please write your issue or suggestion...',
+      'cancel': 'Cancel',
+      'send': 'Send',
+      'message_sent': 'Your message has been sent successfully. Thank you!',
+      'error_occurred': 'An error occurred',
+      'write_message_warning': 'Please write a message',
     },
   };
 
@@ -1100,11 +1114,194 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    // Destek Butonu
+                    Container(
+                      height: 35, // Buton boyutu küçültüldü
+                      width: 35, // Buton boyutu küçültüldü
+                      decoration: BoxDecoration(
+                        color: MinefieldApp.spotifyGrey,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.amber,
+                          width: 2,
+                        ),
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.amber,
+                          size: 20, // İkon boyutu küçültüldü
+                        ),
+                        onPressed: _showSupportDialog,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showSupportDialog() {
+    final TextEditingController messageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: MinefieldApp.spotifyGrey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                AppLocalizations.get('support_title'),
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: messageController,
+                maxLines: 4,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.get('write_message'),
+                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  filled: true,
+                  fillColor: MinefieldApp.spotifyBlack,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.amber.withOpacity(0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.amber,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.grey[600]!),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.get('cancel'),
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (messageController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(AppLocalizations.get('write_message_warning')),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final Uri emailLaunchUri = Uri(
+                          scheme: 'mailto',
+                          path: 'yelbegensoftwarespt@gmail.com',
+                          queryParameters: {
+                            'subject': 'MF_Master_Online',
+                            'body': messageController.text.trim().replaceAll(' ', '_'),
+                          },
+                        );
+
+                        try {
+                          await launchUrl(emailLaunchUri);
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppLocalizations.get('message_sent')),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${AppLocalizations.get('error_occurred')}: ${e.toString()}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.get('send'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1794,6 +1991,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _isBannerAdReady = false;
   BannerAd? _bottomBannerAd;
   bool _isBottomBannerAdReady = false;
+  bool _isFirstClick = true; // İlk tıklama kontrolü için yeni değişken
 
   @override
   void initState() {
@@ -1950,6 +2148,7 @@ class _GameScreenState extends State<GameScreen> {
     _isGameOver = false;
     _isGameWon = false;
     _isFlagMode = false;
+    _isFirstClick = true; // İlk tıklama durumunu sıfırla
 
     _grid = List.generate(
       _rows,
@@ -1959,19 +2158,11 @@ class _GameScreenState extends State<GameScreen> {
       ),
     );
 
-    _placeMines();
-    _calculateAdjacentMines();
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!_isGameOver && !_isGameWon) {
-        setState(() {
-          _time++;
-        });
-      }
-    });
+    // Mayınları başlangıçta yerleştirmiyoruz
+    // _placeMines() metodunu ilk tıklamada çağıracağız
   }
 
-  void _placeMines() {
+  void _placeMines(int firstClickRow, int firstClickCol) {
     final random = Random();
     var minesPlaced = 0;
 
@@ -1979,11 +2170,18 @@ class _GameScreenState extends State<GameScreen> {
       final row = random.nextInt(_rows);
       final col = random.nextInt(_cols);
 
-      if (!_grid[row][col].isMine) {
+      // İlk tıklanan kareye ve çevresine mayın yerleştirmiyoruz
+      bool isNearFirstClick = (row - firstClickRow).abs() <= 1 && 
+                            (col - firstClickCol).abs() <= 1;
+
+      if (!_grid[row][col].isMine && !isNearFirstClick) {
         _grid[row][col].isMine = true;
         minesPlaced++;
       }
     }
+
+    // Mayınlar yerleştirildikten sonra çevredeki mayın sayılarını hesapla
+    _calculateAdjacentMines();
   }
 
   void _calculateAdjacentMines() {
@@ -2018,11 +2216,23 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _revealCell(int row, int col) {
-    if (_isGameOver ||
-        _isGameWon ||
-        _grid[row][col].isRevealed ||
+    if (_isGameOver || 
+        _isGameWon || 
+        _grid[row][col].isRevealed || 
         _grid[row][col].isFlagged) {
       return;
+    }
+
+    if (_isFirstClick) {
+      _isFirstClick = false;
+      _placeMines(row, col); // İlk tıklamada mayınları yerleştir
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!_isGameOver && !_isGameWon) {
+          setState(() {
+            _time++;
+          });
+        }
+      });
     }
 
     setState(() {
