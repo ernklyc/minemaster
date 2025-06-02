@@ -1,6 +1,5 @@
 # Miscellaneous
 *.class
-*.lock
 *.log
 *.pyc
 *.swp
@@ -9,139 +8,49 @@
 .buildlog/
 .history
 .svn/
+migrate_working_dir/
 
-# IntelliJ IDEA and Android Studio
+# IntelliJ related
 *.iml
 *.ipr
 *.iws
 .idea/
 
-# Visual Studio Code
-.vscode/
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
+**/ios/Flutter/.last_build_id
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-.packages
 .pub-cache/
 .pub/
-build/
+/build/
+
+# Symbolication related
 app.*.symbols
+
+# Obfuscation related
 app.*.map.json
-# Generated plugin registrants should be version controlled
-# !android/app/src/main/java/**/GeneratedPluginRegistrant.java
-# !ios/Runner/GeneratedPluginRegistrant.*
 
-# Android related
-**/android/**/gradle-wrapper.jar
-**/android/.gradle
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/local.properties
-# GeneratedPluginRegistrant.java # Genellikle bu doğrudan eklenmez
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
 
-# Android Keystore files - ÇOK ÖNEMLİ - ASLA PAYLAŞMAYIN!
-*.jks
-*.keystore
-**/android/key.properties
-
-# iOS/XCode related
-**/ios/**/*.mode1v3
-**/ios/**/*.mode2v3
-**/ios/**/*.moved-aside
-**/ios/**/*.pbxuser
-**/ios/**/*.perspectivev3
-**/ios/**/*sync/
-**/ios/**/.sconsign.dblite
-**/ios/**/.tags*
-**/ios/**/.vagrant/
-**/ios/**/DerivedData/
-**/ios/**/Pods/
-**/ios/**/.symlinks/
-**/ios/**/profile # Profiling datası
-**/ios/**/xcuserdata
-**/ios/.generated/
-# Flutter.framework and App.framework are not checked in.
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-# Generated.xcconfig needs to be checked in (see https://github.com/flutter/flutter/issues/10611).
-# Snapshots can be large and problematic, so we exclude them unless a subclass project
-# explicitly checks them in.
-# **/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-* # Genellikle ikonu hariç tutmazsınız
-**/ios/Flutter/flutter_assets/
-**/ios/ServiceDefinitions.json
-
-# Firebase
-# lib/firebase_options.dart dosyası genellikle GİT'E EKLENİR.
-# Eğer projenizi açık kaynak olarak paylaşıyorsanız ve başkalarının kendi Firebase
-# projelerini kullanmalarını istiyorsanız, aşağıdaki satırı aktifleştirebilirsiniz.
-# Bu durumda, kullanıcıların `flutterfire configure` komutunu çalıştırmaları gerekir.
-**lib/firebase_options.dart
-
-# Eğer google-services.json (Android) ve GoogleService-Info.plist (iOS) dosyalarını
-# manuel olarak projenize ekliyorsanız ve bunları repoda tutmak istemiyorsanız (ÖNERİLİR):
-**/android/app/google-services.json
-**/ios/Runner/GoogleService-Info.plist
-**/firebase_app_id_file.json
-
-# Web ile ilgili (eğer web için ayrı bir Firebase yapılandırma dosyası kullanıyorsanız)
-# web/firebase-config.js
-
-# IDE bazlı çalışma alanı ayarları
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Rider related
-.ideaRider/
-
-# Windows build files
-**/build/windows/CMakeCache.txt
-**/build/windows/CMakeTmp/
-**/build/windows/CMakeFiles/
-**/build/windows/Debug/
-**/build/windows/Profile/
-**/build/windows/Release/
-**/build/windows/runner/Debug/
-**/build/windows/runner/Profile/
-**/build/windows/runner/Release/
-**/build/windows/flutter/ephemeral/
-**/build/windows/flutter/flutter_export.h
-**/build/windows/flutter/flutter_messenger.h
-**/build/windows/flutter/flutter_plugin_registrar.h
-**/build/windows/flutter/flutter_texture_registrar.h
-**/build/windows/flutter/flutter_windows.h
-**/build/windows/plugins/
-**/windows/flutter/ephemeral/
-**/windows/CMakeCache.txt
-**/windows/CMakeTmp/
-**/windows/CMakeFiles/
-*.vcxproj.filters
-*.vcxproj.user
-
-# Linux build files
-**/build/linux/
-**/linux/flutter/ephemeral/
-**/linux/CMakeCache.txt
-**/linux/CMakeTmp/
-**/linux/CMakeFiles/
-
-# macOS build files
-**/build/macos/
-**/macos/Flutter/ephemeral/
-**/macos/Pods/
-# **/macos/Flutter/Flutter-GRMustache.h # (ve benzeri Flutter internal Pods dosyaları)
-**/macos/Runner.xcworkspace/xcshareddata/ # Kullanıcıya özel Xcode ayarları
-**/macos/Runner.xcworkspace/xcuserdata/
-
-# Secrets - KESİNLİKLE KONTROL EDİN VE EKLEYİN!
-# Eğer herhangi bir özel API anahtarınız, şifreniz veya diğer hassas bilgileriniz varsa
-# bunları içeren dosyaların adlarını veya desenlerini BURAYA ekleyin. Örnek:
-# .env
-# secrets.yaml
-# private_config.json
-# sensitive_data/
+# Hide sensitive information
+google-services.json
+key.properties
+upload-keystore.jks
+# Firebase ve Reklam yapılandırmalarını gizle
+# UYARI: lib/firebase_options.dart dosyasını gizlemek, başkalarının projeyi kendi Firebase
+# projelerine bağlamasını gerektirir (flutterfire configure).
+# Genellikle bu dosya gizlenmez, güvenlik Firebase kurallarıyla sağlanır.
+lib/firebase_options.dart
+# UYARI: lib/ad_helper.dart dosyasını gizlemek, reklamların çalışması için bu dosyanın
+# manuel olarak sağlanmasını gerektirir. Reklam ID'leri genellikle gizli değildir.
+lib/ad_helper.dart
