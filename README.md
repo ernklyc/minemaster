@@ -1,18 +1,27 @@
-# minemaster
+# MF Master Online ✨
 
-.gitignore -> android/, lib/
+# MF Master Online -> https://play.google.com/store/apps/details?id=com.yelbegen.minemaster
 
-A new Flutter project.
+MF Master Online, klasik Mayın Tarlası oyununu modern bir dokunuşla ve online özelliklerle Flutter ile geliştirilmiş bir mobil ve çok platformlu oyundur.
 
-## Getting Started
+## 🎮 Oyun Hakkında
 
-This project is a starting point for a Flutter application.
+Bu proje, oyunculara hem çevrimdışı hem de çevrimiçi Mayın Tarlası deneyimi sunmayı amaçlar. Farklı zorluk seviyeleri, yerel yüksek skorlar ve Google ile giriş yaparak erişilebilen online bir liderlik tablosu içerir.
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Temel Özellikler
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+* **Klasik Mayın Tarlası Oynanışı:** Alışık olduğunuz kurallar ve heyecan.
+* **Farklı Zorluk Seviyeleri:**
+    * Kolay: 8x8 alan, 10 mayın
+    * Orta: 10x10 alan, 15 mayın
+    * Zor: 12x12 alan, 25 mayın
+* **Çevrimdışı Yüksek Skorlar:** Cihazınızda en iyi sürelerinizi kaydedin (Shared Preferences ile).
+* **Online Liderlik Tablosu:** Google hesabınızla giriş yaparak dünya genelindeki oyuncularla yarışın (Firebase Realtime Database ile).
+* **Google ile Giriş:** Online özelliklere erişim için Firebase Authentication ve Google Sign-In entegrasyonu.
+* **Çoklu Dil Desteği:** Türkçe (TR) ve İngilizce (EN) dil seçenekleri.
+* **Reklam Entegrasyonu:** Google Mobile Ads (AdMob) ile banner reklamlar.
+* **Eğitici (Nasıl Oynanır?):** Oyunun temel kontrolleri ve kurallarını açıklayan bölüm.
+* **Geliştirici Bilgileri & Destek:** Geliştiriciye ulaşma ve hata bildirimi imkanı.
+* **Özel Tema:** Spotify benzeri koyu tema ve renk paleti.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
