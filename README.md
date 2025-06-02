@@ -1,6 +1,6 @@
 # MF Master Online ✨
 
-# MF Master Online -> https://play.google.com/store/apps/details?id=com.yelbegen.minemaster
+## https://play.google.com/store/apps/details?id=com.yelbegen.minemaster
 
 MF Master Online, klasik Mayın Tarlası oyununu modern bir dokunuşla ve online özelliklerle Flutter ile geliştirilmiş bir mobil ve çok platformlu oyundur.
 
