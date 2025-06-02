@@ -79,7 +79,7 @@ app.*.map.json
 # Eğer projenizi açık kaynak olarak paylaşıyorsanız ve başkalarının kendi Firebase
 # projelerini kullanmalarını istiyorsanız, aşağıdaki satırı aktifleştirebilirsiniz.
 # Bu durumda, kullanıcıların `flutterfire configure` komutunu çalıştırmaları gerekir.
-# lib/firebase_options.dart
+.lib/firebase_options.dart
 
 # Eğer google-services.json (Android) ve GoogleService-Info.plist (iOS) dosyalarını
 # manuel olarak projenize ekliyorsanız ve bunları repoda tutmak istemiyorsanız (ÖNERİLİR):
